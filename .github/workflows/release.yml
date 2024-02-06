@@ -1,0 +1,29 @@
+name: release
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Pull code
+        uses: actions/checkout@v4
+      - name: Set release version
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Set up Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - name: Build
+        run: deno run --allow-all build.ts $RELEASE_VERSION
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+      - name: Publish to npm
+        run: npm publish npm/
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
