@@ -2,7 +2,7 @@ name: release
 on:
   release:
     types:
-      - created
+      - published
 
 jobs:
   publish:
@@ -10,12 +10,14 @@ jobs:
     steps:
       - name: Pull code
         uses: actions/checkout@v3
+      - name: Set release version
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Set up Deno
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
       - name: Build
-        run: deno run --allow-all build.ts
+        run: deno run --allow-all build.ts $RELEASE_VERSION
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
